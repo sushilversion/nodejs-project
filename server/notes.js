@@ -1,17 +1,29 @@
 const fs= require('fs');
+const chalk= require('chalk')
 const fileName='notes.json'
-const getNotes = function () {
+const getNotes =  ()=> {
     return 'Your notes...'
 }
 
-const addNotes= function(title, body){
+const readNote=(title)=>{
+    console.log(chalk.green.inverse('Reading request for : ', title));
+    const note= loadNotes().find((note)=>note.title===title);
+    if(note==undefined){
+    console.log(chalk.red.inverse('No node found'));
+        return;
+        
+    }
+    console.log(note);
+
+}
+
+
+const addNotes= (title, body)=>{
     const notes= loadNotes();
-    const duplicateNotes=notes.filter(function(note){
-        return note.title===title
-    })
+    const duplicateNote=notes.find((note)=>note.title===title);
     
     console.log('notes', notes);
-    if(duplicateNotes.length===0){
+    if(!duplicateNote){
         notes.push({
             title:title,
              body: body
@@ -24,11 +36,11 @@ const addNotes= function(title, body){
 
     
 }
-const saveNotes=function(notes){
+const saveNotes=(notes)=>{
 const dataJSON= JSON.stringify(notes);
 fs.writeFileSync(fileName, dataJSON);
 }
-const loadNotes=function(){
+const loadNotes=()=>{
     try{
         const dataBuffer=fs.readFileSync(fileName)
         const  dataJSON= dataBuffer.toString();
@@ -38,29 +50,29 @@ const loadNotes=function(){
     }
 
 }
-const removeNote= function(title){
+const removeNote= (title)=>{
 console.log(title)
 const notes= loadNotes();
-const notesToKeep=notes.filter(function(note){
- return note.title!==title;
-});
+const notesToKeep=notes.filter((note)=>note.title!==title);
 
-console.log(notesToKeep);
-saveNotes(notesToKeep);
-console.log('Note updated successfully')
-
+if(notes.length> notesToKeep.length){
+    console.log(chalk.green.inverse('Note Removed'));
+    saveNotes(notesToKeep);
+} else{
+    console.log(chalk.red.inverse('No note found!'))
+}
 
 }
 
-const listNotes= function(){
-    loadNotes().map(function(note){
-     console.log(note);
-    });
+const listNotes= ()=>{
+    console.log(chalk.inverse('Your Notes'))
+    loadNotes().map((note)=>console.log(note.title));
 }
 
 module.exports = {
     getNotes: getNotes,
     addNotes: addNotes,
     removeNote: removeNote,
-    listNotes: listNotes
+    listNotes: listNotes,
+    readNote: readNote
 }
